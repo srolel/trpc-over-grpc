@@ -1,17 +1,11 @@
-import type { inferRouterClient } from '@trpc/client';
-import { TRPCError, initTRPC } from '@trpc/server';
-import superjson from 'superjson';
-import { z } from 'zod';
-import type { UserServiceRouter } from './user-service.contract.js';
+import type { TRPCClient } from "@trpc/client";
+import { TRPCError, initTRPC } from "@trpc/server";
+import superjson from "superjson";
+import { z } from "zod";
+import type { UserServiceRouter } from "./user-service.contract.js";
 
 export interface OrderServiceContext {
   requestId: string | null;
-}
-
-type UserServiceClient = inferRouterClient<UserServiceRouter>;
-
-export interface OrderServiceDependencies {
-  userService: Pick<UserServiceClient, 'userById'>;
 }
 
 const t = initTRPC.context<OrderServiceContext>().create({
@@ -20,22 +14,24 @@ const t = initTRPC.context<OrderServiceContext>().create({
 
 const orders = {
   order_1: {
-    id: 'order_1',
-    userId: 'user_1',
-    sku: 'enterprise-plan',
+    id: "order_1",
+    userId: "user_1",
+    sku: "enterprise-plan",
     totalCents: 4200,
-    currency: 'USD',
+    currency: "USD",
   },
   order_2: {
-    id: 'order_2',
-    userId: 'user_2',
-    sku: 'pro-plan',
+    id: "order_2",
+    userId: "user_2",
+    sku: "pro-plan",
     totalCents: 1900,
-    currency: 'USD',
+    currency: "USD",
   },
 } as const;
 
-export function createOrderServiceRouter(deps: OrderServiceDependencies) {
+export function createOrderServiceRouter(deps: {
+  userService: TRPCClient<UserServiceRouter>;
+}) {
   return t.router({
     orderSummaryById: t.procedure
       .input(
@@ -48,7 +44,7 @@ export function createOrderServiceRouter(deps: OrderServiceDependencies) {
 
         if (!order) {
           throw new TRPCError({
-            code: 'NOT_FOUND',
+            code: "NOT_FOUND",
             message: `No order found for id ${input.orderId}`,
           });
         }
@@ -58,7 +54,7 @@ export function createOrderServiceRouter(deps: OrderServiceDependencies) {
           {
             context: {
               grpcMetadata: {
-                'x-request-id': ctx.requestId ?? 'missing-request-id',
+                "x-request-id": ctx.requestId ?? "missing-request-id",
               },
             },
           },
@@ -70,7 +66,7 @@ export function createOrderServiceRouter(deps: OrderServiceDependencies) {
           totalCents: order.totalCents,
           currency: order.currency,
           requestId: ctx.requestId,
-          handledBy: 'order-service',
+          handledBy: "order-service",
           user,
         };
       }),
