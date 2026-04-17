@@ -10,6 +10,32 @@ This package gives you:
 
 It keeps the normal tRPC developer experience and type inference, but swaps the network hop from HTTP to gRPC for service-to-service calls.
 
+## Quick benchmark snapshot
+
+You can benchmark this transport against standard tRPC `httpLink(...)` with:
+
+```bash
+npm install
+npm run benchmark:transport
+```
+
+Or run a smaller smoke test like the one below:
+
+```bash
+BENCH_WARMUP=10 BENCH_ITERATIONS=50 BENCH_CONCURRENCY=16 npm run benchmark:transport
+```
+
+Sample local result from that smoke run on loopback, comparing `grpcLink(...)` vs `httpLink(...)` on the same router, resolver, and `superjson` transformer:
+
+| Scenario | httpLink req/s | grpcLink req/s | Throughput delta | Avg latency delta |
+| --- | ---: | ---: | ---: | ---: |
+| tiny sequential | 1698.03 | 1805.48 | +6.33% | -5.73% |
+| tiny concurrent | 1964.27 | 4179.58 | +112.78% | -50.31% |
+| medium sequential | 1658.81 | 1785.40 | +7.63% | -7.10% |
+| medium concurrent | 1602.74 | 2630.18 | +64.11% | -36.12% |
+
+Treat these as microbenchmark numbers for the current implementation, not universal production results. This package currently uses **gRPC transport + JSON-serialized tRPC envelopes**, not protobuf payloads yet.
+
 ## What this is
 
 This is **tRPC over gRPC**, not protobuf-first API generation.
@@ -143,6 +169,20 @@ npm run example:microservices
 ```
 
 See `examples/microservices/README.md` for the file layout and separate service commands.
+
+## Benchmark
+
+A transport benchmark lives in `benchmarks/transport`.
+
+It compares this package's `grpcLink(...)` against standard tRPC `httpLink(...)` using the same router, same resolver, and same transformer.
+
+Run it with:
+
+```bash
+npm run benchmark:transport
+```
+
+See `benchmarks/transport/README.md` for the benchmark caveats and tunables.
 
 ## API
 

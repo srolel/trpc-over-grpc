@@ -21,6 +21,7 @@
     "clean": "rm -rf dist coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "benchmark:transport": "tsx benchmarks/transport/run.ts",
     "example:microservices": "tsx examples/microservices/run-demo.ts",
     "example:microservices:user": "tsx examples/microservices/user-service.ts",
     "example:microservices:order": "tsx examples/microservices/order-service.ts"
